@@ -7,7 +7,6 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -22,14 +21,28 @@ export default function Item() {
   const [items, setItems] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [newItemCategroy, setNewItemCategory] = useState("");
+
   const newItemName = useRef(null);
   const newItemPrice = useRef(null);
   const newItemAmount = useRef(null);
   const isInit = useRef(false);
+
   const cols = [
-    { field: "name", headerName: "Name", flex: 3 },
-    { field: "category", headerName: "Category", flex: 3 },
-    { field: "price", headerName: "Price", flex: 2 },
+    {
+      field: "name",
+      headerName: "Name",
+      flex: 3,
+    },
+    {
+      field: "category",
+      headerName: "Category",
+      flex: 3,
+    },
+    {
+      field: "price",
+      headerName: "Price",
+      flex: 2,
+    },
     {
       field: "actions",
       headerName: "",
@@ -38,67 +51,119 @@ export default function Item() {
       flex: 1,
       renderCell: (params) => {
         return (
-          <IconButton>
-            <DeleteIcon
-              color="error"
-              onClick={() => {
-                onItemDelete(params.row._id);
-              }}
-            />
+          <IconButton
+            onClick={() => {
+              onItemDelete(params.row._id);
+            }}
+          >
+            <DeleteIcon color="error" />
           </IconButton>
         );
       },
     },
   ];
+
+  const loadItems = async () => {
+    try {
+      const fetchResult = await fetch(`${API_URL}/api/item`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (fetchResult.ok) {
+        const data = await fetchResult.json();
+
+        setItems(data.itemList);
+      } else {
+        const data = await fetchResult.json();
+
+        console.log("==>GET Items failed:", data.message);
+      }
+    } catch (error) {
+      console.error("==>GET Items error:", error);
+    }
+  };
+
   useEffect(() => {
     if (isInit.current) return;
+
     isInit.current = true;
     loadItems();
   }, []);
-  const loadItems = async () => {
-    const fetchResult = await fetch(`${API_URL}/api/item`, {
-      method: "GET",
-    });
-    if (fetchResult.ok) {
-      const data = await fetchResult.json();
-      setItems(data.itemList);
-    }
-  };
+
   const onCategoryChange = (event) => {
     setNewItemCategory(event.target.value);
   };
+
   const closeDialog = () => {
     newItemName.current.value = "";
     newItemAmount.current.value = "";
     newItemPrice.current.value = "";
+
     setNewItemCategory("");
     setOpenDialog(false);
   };
+
   const onAddItem = async () => {
     const name = newItemName.current.value;
     const category = newItemCategroy;
     const price = newItemPrice.current.value;
     const amount = newItemAmount.current.value;
+
     const newItem = {
       name: name,
       category: category,
       price: price,
       amount: amount,
     };
-    const addItemResult = await fetch(`${API_URL}/api/item`, {
-      body: JSON.stringify(newItem),
-      method: "POST",
-    });
-    if (addItemResult.ok) {
-      await loadItems();
+
+    try {
+      const addItemResult = await fetch(`${API_URL}/api/item`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newItem),
+      });
+
+      if (addItemResult.ok) {
+        await loadItems();
+        closeDialog();
+      } else {
+        const data = await addItemResult.json();
+
+        console.log("==>Add Item failed:", data.message);
+      }
+    } catch (error) {
+      console.error("==>Add Item error:", error);
     }
-    closeDialog();
   };
-  const onItemDelete = async (rowId) => {};
+
+  const onItemDelete = async (rowId) => {
+    try {
+      const deleteResult = await fetch(`${API_URL}/api/item/${rowId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (deleteResult.ok) {
+        await loadItems();
+      } else {
+        const data = await deleteResult.json();
+
+        console.log("==>Delete Item failed:", data.message);
+      }
+    } catch (error) {
+      console.error("==>Delete Item error:", error);
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4 px-1">
         <Typography variant="h6">Items</Typography>
+
         <Button
           variant="contained"
           onClick={() => {
@@ -108,12 +173,19 @@ export default function Item() {
           Add Item
         </Button>
       </div>
-      <DataGrid rows={items} columns={cols} getRowId={(row) => row._id} />
+
+      <DataGrid
+        rows={items}
+        columns={cols}
+        getRowId={(row) => row._id}
+      />
+
       <Dialog open={openDialog} onClose={closeDialog} fullWidth>
         <DialogContent>
           <DialogContentText sx={{ mb: 1 }}>
             <Typography variant="h6">Add New Item</Typography>
           </DialogContentText>
+
           <div className="flex flex-col gap-2">
             <TextField
               required
@@ -122,8 +194,12 @@ export default function Item() {
               defaultValue=""
               inputRef={newItemName}
             />
+
             <FormControl fullWidth>
-              <InputLabel id="label-item-category">Item Category</InputLabel>
+              <InputLabel id="label-item-category">
+                Item Category
+              </InputLabel>
+
               <Select
                 labelId="label-item-category"
                 id="item-category"
@@ -136,6 +212,7 @@ export default function Item() {
                 <MenuItem value="Headphone">Headphone</MenuItem>
               </Select>
             </FormControl>
+
             <TextField
               required
               id="item-price"
@@ -143,6 +220,7 @@ export default function Item() {
               defaultValue=""
               inputRef={newItemPrice}
             />
+
             <TextField
               required
               id="item-amount"
@@ -152,9 +230,14 @@ export default function Item() {
             />
           </div>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={closeDialog}>Cancel</Button>
-          <Button variant="contained" onClick={onAddItem}>
+
+          <Button
+            variant="contained"
+            onClick={onAddItem}
+          >
             Add Item
           </Button>
         </DialogActions>
