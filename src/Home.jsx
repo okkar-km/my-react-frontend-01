@@ -18,8 +18,6 @@ import { useContext, useEffect } from "react";
 
 import { UserContext } from "./context/UserContext";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export default function Home() {
   const navigate = useNavigate();
 
@@ -64,7 +62,7 @@ export default function Home() {
           <Button
             color="inherit"
             onClick={async () => {
-              const result = await fetch(`${API_URL}/api/auth/logout`, {
+              const result = await fetch("/api/auth/logout", {
                 credentials: "include",
               });
 

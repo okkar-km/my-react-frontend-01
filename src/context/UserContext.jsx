@@ -1,7 +1,5 @@
 import { createContext, useEffect, useRef, useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export const UserContext = createContext();
 
 export function UserProvider({ children }) {
@@ -15,7 +13,7 @@ export function UserProvider({ children }) {
 
   const me = async () => {
     try {
-      const result = await fetch(`${API_URL}/api/me`, {
+      const result = await fetch("/api/me", {
         method: "GET",
         credentials: "include",
       });
@@ -63,7 +61,7 @@ export function UserProvider({ children }) {
     setLoginErrorMsg("");
 
     try {
-      const result = await fetch(`${API_URL}/api/auth/login`, {
+      const result = await fetch("/api/auth/login", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -113,7 +111,7 @@ export function UserProvider({ children }) {
 
   const logout = async () => {
     try {
-      const result = await fetch(`${API_URL}/api/auth/logout`, {
+      const result = await fetch("/api/auth/logout", {
         method: "GET",
         credentials: "include",
       });

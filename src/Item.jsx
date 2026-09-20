@@ -15,8 +15,6 @@ import InputLabel from "@mui/material/InputLabel";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export default function Item() {
   const [items, setItems] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -65,7 +63,7 @@ export default function Item() {
 
   const loadItems = async () => {
     try {
-      const fetchResult = await fetch(`${API_URL}/api/item`, {
+      const fetchResult = await fetch("/api/item", {
         method: "GET",
         credentials: "include",
       });
@@ -118,7 +116,7 @@ export default function Item() {
     };
 
     try {
-      const addItemResult = await fetch(`${API_URL}/api/item`, {
+      const addItemResult = await fetch("/api/item", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -142,7 +140,7 @@ export default function Item() {
 
   const onItemDelete = async (rowId) => {
     try {
-      const deleteResult = await fetch(`${API_URL}/api/item/${rowId}`, {
+      const deleteResult = await fetch(`/api/item/${rowId}`, {
         method: "DELETE",
         credentials: "include",
       });

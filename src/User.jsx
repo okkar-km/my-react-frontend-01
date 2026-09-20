@@ -13,8 +13,6 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 export default function User() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState("");
@@ -35,7 +33,7 @@ export default function User() {
   }, []);
 
   async function getUsers() {
-    const result = await fetch(`${API_URL}/api/user`, {
+    const result = await fetch("/api/user", {
       credentials: "include",
     });
 
@@ -69,7 +67,7 @@ export default function User() {
       return;
     }
 
-    const result = await fetch(`${API_URL}/api/user/password`, {
+    const result = await fetch("/api/user/password", {
       method: "PUT",
 
       credentials: "include",
@@ -124,7 +122,7 @@ export default function User() {
       return;
     }
 
-    const result = await fetch(`${API_URL}/api/user`, {
+    const result = await fetch("/api/user", {
       method: "POST",
       credentials: "include",
       headers: {
